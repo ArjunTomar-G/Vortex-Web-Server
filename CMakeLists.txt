@@ -33,3 +33,7 @@ add_executable(vortex_server ${SOURCES})
 
 # Link the Linux threading library to your executable
 target_link_libraries(vortex_server PRIVATE Threads::Threads)
+
+# test executables
+add_executable(test_pool tests/test_threadpool.cpp src/concurrency/ThreadPool.cpp)
+target_link_libraries(test_pool PRIVATE Threads::Threads)
