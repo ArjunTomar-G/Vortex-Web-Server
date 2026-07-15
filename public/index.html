@@ -1,0 +1,91 @@
+<!-- sample to perform apachetest -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex Control Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon"></span>
+                <h1>VORTEX<span>.engine</span></h1>
+            </div>
+            <div class="status-badge">
+                <span class="pulse-indicator"></span>
+                SERVER ONLINE
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <h3>Target Throughput</h3>
+                <p class="metric-value">10,000+</p>
+                <span class="metric-unit">Req / Second</span>
+            </div>
+            <div class="metric-card">
+                <h3>I/O Architecture</h3>
+                <p class="metric-value">O(1)</p>
+                <span class="metric-unit">epoll Event Loop</span>
+            </div>
+            <div class="metric-card">
+                <h3>Memory Transfer</h3>
+                <p class="metric-value">Zero</p>
+                <span class="metric-unit">Kernel sendfile() Copies</span>
+            </div>
+        </section>
+
+        <section class="panel-section">
+            <div class="panel-header">
+                <h2>Low-Level Systems Architecture</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon async-icon"></div>
+                    <h3>Asynchronous Multiplexing</h3>
+                    <p>Utilizes Linux edge-triggered <code>epoll</code> to monitor thousands of non-blocking socket file descriptors simultaneously on a single management thread.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon pool-icon"></div>
+                    <h3>Worker Thread Pool</h3>
+                    <p>Decouples I/O monitoring from request processing using a synchronized FIFO task queue managed via condition variable signaling.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon copy-icon"></div>
+                    <h3>Kernel-Space Zero-Copy</h3>
+                    <p>Bypasses user-space execution memory completely during static file distribution, shifting direct pipeline mapping entirely to hardware DMA paths.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel-section">
+            <div class="panel-header">
+                <h2>Static Resource Distribution Verification</h2>
+            </div>
+            <div class="tester-container">
+                <p>This page and its accompanying stylesheet were successfully transferred out of the Linux kernel page cache directly into the active socket channel.</p>
+                <div class="file-manifest">
+                    <div class="file-item">
+                        <span class="file-name">public/index.html</span>
+                        <span class="file-status code-html">text/html</span>
+                    </div>
+                    <div class="file-item">
+                        <span class="file-name">public/style.css</span>
+                        <span class="file-status code-css">text/css</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Built from scratch using C++17 & POSIX Linux Sockets Engine</p>
+    </footer>
+    
+</body>
+</html>
