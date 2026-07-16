@@ -1,6 +1,7 @@
 #include "http/Request.hpp"
 #include "http/Response.hpp"
 #include "network/EpollServer.hpp"
+#include "utils/Logger.hpp"
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -71,7 +72,7 @@ void EpollServer::set_non_blocking(int fd) {
 
 void EpollServer::start() {
     running = true;
-    std::cout << "[INFO] Vortex Server Event Loop started on port " << port << "...\n";
+    Logger::info("[INFO] Vortex Server Event Loop started on port "+ std::to_string(port)+ "...\n");
 
     while (running) {
         // Wait indefinitely for an event
@@ -108,7 +109,7 @@ void EpollServer::accept_connection() {
             break;
         }
 
-        std::cout << "[NETWORK] New connection established! (FD: " << client_fd << ")\n";
+        logger::info("[NETWORK] New connection established! (FD: " + std::to_string(client_fd) + ")\n");
         
         // Make the new client non-blocking
         set_non_blocking(client_fd);
