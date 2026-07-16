@@ -1,7 +1,8 @@
 #pragma once
 
 #include <sys/epoll.h>
-#include <string>
+#include <memory>
+#include "concurrency/ThreadPool.hpp"
 
 #define MAX_EVENTS 64
 
@@ -12,6 +13,8 @@ private:
     int port;
     bool running;
     struct epoll_event events[MAX_EVENTS];
+
+    std::unique_ptr<ThreadPool> thread_pool;
 
     void set_non_blocking(int fd);
     void accept_connection();

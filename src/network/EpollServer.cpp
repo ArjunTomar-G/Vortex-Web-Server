@@ -5,8 +5,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <thread>
 
 EpollServer::EpollServer(int port) : port(port), running(false) {
+
+    // ThreadPool with 4 concurrent workers
+    thread_pool = std::make_unique<ThreadPool>(4);
+
     // 1. Create the server socket
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1) {
@@ -109,33 +114,42 @@ void EpollServer::accept_connection() {
         // Add the client to epoll
         struct epoll_event event{};
         event.data.fd = client_fd;
-        event.events = EPOLLIN | EPOLLET;
+        event.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
         epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
     }
 }
 
 void EpollServer::handle_client_data(int client_fd) {
-    char buffer[1024];
-    
-    // Read in a loop until the kernel buffer is empty (required for EPOLLET)
-    while (true) {
-        ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+    // I/O sequence into the ThreadPool queue
+    thread_pool->enqueue([client_fd]() {
+        char buffer[1024];
         
-        if (bytes_read > 0) {
-            buffer[bytes_read] = '\0';
-            std::cout << "[NETWORK] Received " << bytes_read << " bytes from FD " << client_fd << ": " << buffer;
-        } else if (bytes_read == 0) {
-            std::cout << "[NETWORK] Client (FD: " << client_fd << ") disconnected.\n";
-            close(client_fd); // Removing a closed FD from epoll is automatic in newer Linux kernels
-            break;
-        } else {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // We have read all available data for now
-                break;
+        // 1. Read the raw HTTP request bytes from the socket
+        while (true) {
+            ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+            if (bytes_read > 0) {
+                buffer[bytes_read] = '\0';
+                std::cout << "\n[WORKER " << std::this_thread::get_id() << "] Processing FD " << client_fd << "\n";
+            } else if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                break; // Buffer is empty, move on to writing
+            } else {
+                close(client_fd);
+                return; // Connection dropped
             }
-            std::cerr << "[ERROR] Read error on FD " << client_fd << "\n";
-            close(client_fd);
-            break;
         }
-    }
+
+        // 2. The Hardcoded HTTP Response
+        std::string response = "HTTP/1.1 200 OK\r\n"
+                               "Content-Type: text/plain\r\n"
+                               "Content-Length: 12\r\n"
+                               "Connection: close\r\n\r\n"
+                               "Hello World!";
+        
+        // 3. Write back to the client
+        write(client_fd, response.c_str(), response.length());
+
+        // 4. Terminate the connection (HTTP/1.0 style for Phase 2)
+        close(client_fd);
+        std::cout << "[WORKER " << std::this_thread::get_id() << "] Responded and closed FD " << client_fd << "\n";
+    });
 }
