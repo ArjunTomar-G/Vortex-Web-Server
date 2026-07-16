@@ -1,7 +1,9 @@
 #include "network/EpollServer.hpp"
 #include <iostream>
-
+#include "utils/Logger.hpp"
 int main() {
+    Logger::init(); 
+    Logger::info("Booting Vortex Engine...");
     std::cout << "==========================================\n";
     std::cout << "       VORTEX ENGINE: INITIALIZING        \n";
     std::cout << "==========================================\n";

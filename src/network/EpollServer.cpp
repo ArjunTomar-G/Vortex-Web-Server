@@ -109,7 +109,7 @@ void EpollServer::accept_connection() {
             break;
         }
 
-        logger::info("[NETWORK] New connection established! (FD: " + std::to_string(client_fd) + ")\n");
+        Logger::info("[NETWORK] New connection established! (FD: " + std::to_string(client_fd) + ")\n");
         
         // Make the new client non-blocking
         set_non_blocking(client_fd);

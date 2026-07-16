@@ -17,7 +17,7 @@ void HttpRequest::parse(const std::string& raw_request) {
     // Map the requested URI to your local "public" folder
     filepath = "public" + uri;
     
-    logger::info("[PARSER] Method: " + std::to_string(method) + " | Requested File: " + std::to_string(filepath) + "\n");
+    Logger::info("[PARSER] Method: " + method + " | Requested File: " + filepath);
 }
 
 std::string HttpRequest::get_method() const { return method; }

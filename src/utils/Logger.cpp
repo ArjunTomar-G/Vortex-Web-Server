@@ -4,9 +4,17 @@
 #include <iomanip>
 #include <sstream>
 
-// Initialize the static mutex
 std::mutex Logger::log_mutex;
+std::ofstream Logger::log_file;
 const std::string Logger::RESET_COLOR = "\033[0m";
+// open the file safely in append mode
+void Logger::init(const std::string& filepath) {
+    std::lock_guard<std::mutex> lock(log_mutex);
+    log_file.open(filepath, std::ios::app); 
+    if (!log_file.is_open()) {
+        std::cerr << "\033[31m[FATAL] Could not open log file: " << filepath << RESET_COLOR << "\n";
+    }
+}
 
 std::string Logger::get_current_time() {
     auto now = std::chrono::system_clock::now();
@@ -37,13 +45,21 @@ std::string Logger::level_to_color(LogLevel level) {
 }
 
 void Logger::log(LogLevel level, const std::string& message) {
-    // 1. Lock the terminal so no other thread can print right now
     std::lock_guard<std::mutex> lock(log_mutex);
     
-    // 2. Safely output the color-coded, timestamped string
+    std::string time_str = get_current_time();
+    std::string level_str = level_to_string(level);
+
+    // Terminal Output
     std::cout << level_to_color(level) 
-              << "[" << get_current_time() << "] "
-              << "[" << level_to_string(level) << "] "
+              << "[" << time_str << "] "
+              << "[" << level_str << "] "
               << message 
               << RESET_COLOR << "\n";
-} // 3. Mutex is automatically released here when lock goes out of scope
+
+    // File Output
+    if (log_file.is_open()) {
+        log_file << "[" << time_str << "] [" << level_str << "] " << message << "\n";
+        log_file.flush(); 
+    }
+}
