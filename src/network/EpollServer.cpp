@@ -1,3 +1,5 @@
+#include "http/Request.hpp"
+#include "http/Response.hpp"
 #include "network/EpollServer.hpp"
 #include <iostream>
 #include <sys/socket.h>
@@ -120,36 +122,42 @@ void EpollServer::accept_connection() {
 }
 
 void EpollServer::handle_client_data(int client_fd) {
-    // I/O sequence into the ThreadPool queue
     thread_pool->enqueue([client_fd]() {
-        char buffer[1024];
+        char buffer[4096]; 
+        std::string raw_request_data;
         
-        // 1. Read the raw HTTP request bytes from the socket
+        // 1. Read the socket
         while (true) {
             ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
             if (bytes_read > 0) {
                 buffer[bytes_read] = '\0';
-                std::cout << "\n[WORKER " << std::this_thread::get_id() << "] Processing FD " << client_fd << "\n";
+                raw_request_data += buffer;
             } else if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-                break; // Buffer is empty, move on to writing
+                break; // Buffer is empty
             } else {
                 close(client_fd);
                 return; // Connection dropped
             }
         }
 
-        // 2. The Hardcoded HTTP Response
-        std::string response = "HTTP/1.1 200 OK\r\n"
-                               "Content-Type: text/plain\r\n"
-                               "Content-Length: 12\r\n"
-                               "Connection: close\r\n\r\n"
-                               "Hello World!";
-        
-        // 3. Write back to the client
-        write(client_fd, response.c_str(), response.length());
+        if (raw_request_data.empty()) {
+            close(client_fd);
+            return;
+        }
 
-        // 4. Terminate the connection (HTTP/1.0 style for Phase 2)
+        // 2. Parse the HTTP Request
+        HttpRequest request;
+        request.parse(raw_request_data);
+
+        // 3. Serve the file directly from disk to the network socket
+        if (request.get_method() == "GET") {
+            HttpResponse::send_file(client_fd, request.get_filepath());
+        } else {
+            // If they try to POST or something else, just send a 404 for now
+            HttpResponse::send_404(client_fd);
+        }
+
+        // 4. Terminate the connection
         close(client_fd);
-        std::cout << "[WORKER " << std::this_thread::get_id() << "] Responded and closed FD " << client_fd << "\n";
     });
 }
