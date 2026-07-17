@@ -56,7 +56,7 @@ To maximize throughput, Vortex serves static files using Linux's `sendfile()` sy
   │          │ 6. Yield &                  │ ThreadPool (Worker Threads)  │
   │          │    Wait for next            │ ├── [ Thread 1 (Parsing) ]   │
   │          │    Event                    │ ├── [ Thread 2 (Sleeping)]   │
-  │          └─────────────────────────────│ └── [ Thread 4 ...       ]   │
+  │          └─────────────────────────────│ └── [ Thread N ...       ]   │
   │                                        └─────────────┬────────────────┘
   │                                                      │
   │        5. Kernel sendfile() transfers file           │
@@ -281,7 +281,7 @@ make
 
 ## Benchmarking
 
-To evaluate the performance of the `epoll` event loop and the zero-Copy file transfer, Vortex includes a standardized benchmarking script using ApacheBench (`ab`). 
+To evaluate the performance of the `epoll` event loop and the zero-copy file transfer, Vortex includes a standardized benchmarking script using ApacheBench (`ab`). 
 
 ### The Crucible Test
 The target benchmark fires **50,000 total requests** with a **concurrency of 1,000 simultaneous connections**. 
@@ -368,4 +368,4 @@ Percentage of the requests served within a certain time (ms)
 ### Trace Execution Metrics Analysis
 
 * **Event-Driven Scalability:** The server handles the entire 1,000-connection high-concurrency workload with **0 failed requests**, showing that the edge-triggered `epoll` efficiently handles large numbers of concurrent connections while minimizing unnecessary event processing.
-* **Zero-Copy File Transfer:** Clocking over **30,000+ Requests Per Second** at an active transfer rate of `~119.7 MB/s` demonstrates that `sendfile()` efficiently serves static file payloads while avoiding an additional copy through user space, reducing CPU overhead associated with traditional file-copying paths.
+* **Zero-Copy File Transfer:** Clocking over **31,000+ Requests Per Second** at an active transfer rate of `~119.7 MB/s` demonstrates that `sendfile()` efficiently serves static file payloads while avoiding an additional copy through user space, reducing CPU overhead associated with traditional file-copying paths.
