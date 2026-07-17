@@ -298,7 +298,7 @@ When running the benchmark, ApacheBench produces output similar to the following
 
 ```text
 ==========================================
-        VORTEX ENGINE: LOAD TESTER        
+       VORTEX ENGINE: LOAD TESTER         
 ==========================================
 [INFO] Target Engine: http://127.0.0.1:8080/
 [INFO] Verifying server status...
@@ -308,42 +308,59 @@ When running the benchmark, ApacheBench produces output similar to the following
 [INFO] Commencing Maximum Throughput Test...
 [INFO] Payload: 50,000 Requests | 1,000 Concurrent Connections
 ------------------------------------------
+This is ApacheBench, Version 2.3 <$Revision: 1923142 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 5000 requests
+Completed 10000 requests
+Completed 15000 requests
+Completed 20000 requests
+Completed 25000 requests
+Completed 30000 requests
+Completed 35000 requests
+Completed 40000 requests
+Completed 45000 requests
+Completed 50000 requests
+Finished 50000 requests
+
 
 Server Software:        Vortex
 Server Hostname:        127.0.0.1
 Server Port:            8080
 
 Document Path:          /
-Document Length:        3482 bytes
+Document Length:        3763 bytes
 
 Concurrency Level:      1000
-Time taken for tests:   3.421 seconds
+Time taken for tests:   1.576 seconds
 Complete requests:      50000
 Failed requests:        0
-Total transferred:      181600000 bytes
-HTML transferred:       174100000 bytes
-Requests per second:    14615.61 [#/sec] (mean)
-Time per request:       68.420 [ms] (mean)
-Time per request:       0.068 [ms] (mean, across all concurrent requests)
-Transfer rate:          51842.21 [Kbytes/sec] received
+Total transferred:      193200000 bytes
+HTML transferred:       188150000 bytes
+Requests per second:    31727.10 [#/sec] (mean)
+Time per request:       31.519 [ms] (mean)
+Time per request:       0.032 [ms] (mean, across all concurrent requests)
+Transfer rate:          119720.21 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    2   1.4      2      12
-Processing:     4   65  12.8     66      94
-Waiting:        2   62  13.1     63      91
-Total:          5   68  13.2     68     101
+Connect:        0    1   2.3      1      19
+Processing:    15   30   6.2     29      61
+Waiting:        0   29   5.9     29      58
+Total:         19   31   6.2     30      67
 
 Percentage of the requests served within a certain time (ms)
-  50%     68ms
-  66%     71ms
-  75%     73ms
-  80%     74ms
-  90%     78ms
-  95%     82ms
-  98%     89ms
-  99%     94ms
- 100%    101ms (longest request)
+  50%     30
+  66%     32
+  75%     33
+  80%     34
+  90%     37
+  95%     40
+  98%     52
+  99%     60
+ 100%     67 (longest request)
 ------------------------------------------
 [INFO] Stress test concluded.
 ==========================================
@@ -351,4 +368,4 @@ Percentage of the requests served within a certain time (ms)
 ### Trace Execution Metrics Analysis
 
 * **Event-Driven Scalability:** The server handles the entire 1,000-connection high-concurrency workload with **0 failed requests**, showing that the edge-triggered `epoll` efficiently handles large numbers of concurrent connections while minimizing unnecessary event processing.
-* **Zero-Copy File Transfer:** Clocking over **14,500+ Requests Per Second** at an active transfer rate of `~51.8 MB/s` demonstrates that `sendfile()` efficiently serves static file payloads while avoiding an additional copy through user space, reducing CPU overhead associated with traditional file-copying paths.
+* **Zero-Copy File Transfer:** Clocking over **30,000+ Requests Per Second** at an active transfer rate of `~119.7 MB/s` demonstrates that `sendfile()` efficiently serves static file payloads while avoiding an additional copy through user space, reducing CPU overhead associated with traditional file-copying paths.
